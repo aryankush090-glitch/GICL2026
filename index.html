@@ -580,21 +580,17 @@ async function submitForm() {
   local.push({...data, paymentScreenshot: screenshotBase64 ? "[Screenshot Attached]" : "Not uploaded"});
   localStorage.setItem('gicl_registrations', JSON.stringify(local));
 
-  // Send to Google Sheets via form POST (works with no-cors + large payloads)
+  // Send to Google Sheets as JSON
   if (SHEET_URL && SHEET_URL !== "YOUR_APPS_SCRIPT_URL_HERE") {
     try {
-      const formData = new FormData();
-      formData.append('payload', JSON.stringify(data));
-      if (screenshotFile) {
-        formData.append('screenshot', screenshotFile, screenshotFile.name);
-      }
       await fetch(SHEET_URL, {
         method: 'POST',
         mode: 'no-cors',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
       });
     } catch(e) {
-      console.log('Sheet sync failed, saved locally:', e);
+      console.log('Sheet sync failed:', e);
     }
   }
 
